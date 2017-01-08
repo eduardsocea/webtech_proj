@@ -1,26 +1,260 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>
 
-            <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/angular_material/1.1.0/angular-material.min.css">
-            <link rel="stylesheet" type="text/css" href="css/styles.css">
-        </title>
-    </head>
-    <body ng-app="webtechApp">
+<head>
+    <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.8/css/materialize.min.css">
+    <link rel="stylesheet" type="text/css" href="css/styles.css">
+    <title>
 
-        <div ng-controller = "MainController">
+    </title>
+</head>
+
+<body ng-app="webtechApp">
+
+    <div ng-controller="MainController">
+
+        <nav class="nav-extended">
+            <div class="nav-wrapper">
+                <ul class="tabs tabs-transparent">
+                    <li class="tab"><a href="#home">Home</a></li>
+                    <li class="tab"><a href="#charts">Grafice</a></li>
+                    <li class="tab"><a href="#test4">Test 4</a></li>
+                </ul>
+            </div>
+        </nav>
+        <div id="home" class="col s12">
+            <div class="wrapper">
+                <ul class="collection" ng-repeat="category in categoryProducts">
+                    <li class="collection-item">
+                        <a href="#products_modal" ng-click="getProductsByCategory(category.id)">
+                            <div>{{category.name}}<span class="secondary-content">{{getTotalPriceOfCategory(category)}} RON</span></div>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+        </div>
+        <div id="charts" class="col s12">
+            <div id="chart_div"></div>
+        </div>
+        <div id="test4" class="col s12">Test 4</div>
+
+
+        <div class="fixed-action-btn vertical">
+            <a class="btn-floating btn-large red">
+                <i class="material-icons">menu</i>
+            </a>
+            <ul>
+                <li><a class="btn-floating green" href="#settings_modal"><i class="material-icons">settings</i></a></li>
+                <li><a class="btn-floating blue" href="#insert_product_modal"><i class="fa fa-plus" aria-hidden="true"></i></a></li>
+            </ul>
+        </div>
+
+        <!-- Modal Structure -->
+        <div id="settings_modal" class="modal">
+            <div class="modal-content">
+                <h4>Settings</h4>
+                <p>A bunch of text</p>
+            </div>
+            <div class="modal-footer">
+                <a href="#!" class=" modal-action modal-close waves-effect waves-green btn-flat">Agree</a>
+            </div>
+        </div>
+
+        <div id="insert_product_modal" class="modal">
+            <div class="modal-content">
+                <h4>Adauga produs</h4>
+                <div class="errors" ng-show="errors">
+                    <p ng-repeat="error in errors">{{error}}</p>
+                </div>
+
+
+                <div class="row">
+                    <form class="col s12">
+                        <div class="row">
+                            <div class="input-field col s6">
+                                <input id="product_name" type="text" ng-model="productName">
+                                <label for="product_name">Nume</label>
+                            </div>
+                            <div class="input-field col s6">
+                                <input id="product_price" type="number" step="0.01" ng-model="productPrice">
+                                <label for="product_price">Pret</label>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="input-field col s12">
+                                <input id="product_datestamp" type="text" class="datepicker" ng-model="productDatestamp" placeholder="mm/dd/yyyy">
+                                <label for="product_datestamp">Data</label>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col s12">
+                                <label>Categorie</label>
+                                <select id="category_id" ng-options="category as category.name for category in categories track by category.id" ng-model="productCategory"
+                                    class="browser-default">
+                                    <option value="">-- select --</option>
+                                    </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col s12">
+                                <button class="btn waves-effect waves-light" type="submit" name="action" ng-click="addProduct()">Adauga
+                                    <i class="material-icons right">send</i>
+                                </button>
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div id="products_modal" class="modal">
+            <div class="modal-content">
+                <h4>Produse</h4>
+                <div class="row">
+                    <div class="input-field col s4">
+                        <input id="searchByDate" type="text" ng-model="searchDate.datestamp" placeholder="">
+                        <label for="searchByDate">Cauta dupa Data</label>
+                    </div>
+
+                    <div class="input-field col s4">
+                        <input id="search_product" type="text" ng-model="search.name" placeholder="">
+                        <label for="search_product">Cauta dupa Name</label>
+                    </div>
+                </div>
+                <table class="highlight">
+                    <thead>
+                        <th>Nume</th>
+                        <th>Data</th>
+                        <th>Pret (RON)</th>
+                        <th width="30px"></th>
+                        <th width="30px"></th>
+                    </thead>
+                    <tbody class="category-container" ng-repeat="categories in productsByCategory | filter:searchDate">
+                        <tr>
+                            <td colspan="5">
+                                <b>{{categories.datestamp}}</b>
+                            </td>
+                        </tr>
+                        <tr ng-repeat="product in categories.products | filter:search">
+                            <td>{{product.name}}</td>
+                            <td>{{product.datestamp | date : 'MM/dd/yyyy'}}</td>
+                            <td>{{product.price}}</td>
+                            <td><a href="#edit_product_modal" ng-click="loadUpdateProduct(product.id)"><i class="material-icons">mode_edit</i></a></td>
+                            <td class="delete-product" ng-click="deleteProduct(product.id, $event)"><i class="material-icons">delete</i></td>
+                        </tr>
+                        <tr style="color: #757575">
+                            <td colspan="2" style="padding-left:10px"><b>Subtotal</b></td>
+                            <td colspan="3"><b>{{getSubTotal(categories.datestamp)}}</b></td>
+                        </tr>
+                    </tbody>
+
+                </table>
+
+
+            </div>
 
         </div>
 
-        <script type="text/javascript" src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
-        <script type="text/javascript" src="https://code.angularjs.org/1.5.5/angular.min.js"></script>
-        <script type="text/javascript" src="https://code.angularjs.org/1.5.5/angular-animate.min.js"></script>
-        <script type="text/javascript" src="https://code.angularjs.org/1.5.5/angular-aria.min.js"></script>
-        <script type="text/javascript" src="https://code.angularjs.org/1.5.5/angular-messages.min.js"></script>
-        <script src="http://ajax.googleapis.com/ajax/libs/angular_material/1.1.0/angular-material.min.js"></script>
+        <div id="edit_product_modal" class="modal">
+            <div class="modal-content">
+                <h4>Actualizeaza produs</h4>
+                <div class="errors" ng-show="errors">
+                    <p ng-repeat="error in errors">{{error}}</p>
+                </div>
+                <div class="row">
+                    <form class="col s12">
+                        <div class="row">
+                            <div class="input-field col s6">
+                                <input id="product_name" type="text" ng-model="productName" placeholder="">
+                                <label for="product_name">Nume</label>
+                            </div>
+                            <div class="input-field col s6">
+                                <input id="product_price" type="number" step="0.01" ng-model="productPrice" placeholder="">
+                                <label for="product_price">Pret</label>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="input-field col s12">
+                                <input id="product_datestamp" type="text" class="datepicker" ng-model="productDatestamp" placeholder="mm/dd/yyyy">
+                                <label for="product_datestamp">Data</label>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col s12">
+                                <label>Categorie</label>
+                                <select id="category_id" ng-options="category as category.name for category in categories track by category.id" ng-model="productCategory"
+                                    class="browser-default">
+                                    <option value="">-- select --</option>
+                                    </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col s12">
+                                <button class="btn waves-effect waves-light" type="submit" name="action" ng-click="updateProduct(productId)">Actualizeaza
+                                    <i class="material-icons right">send</i>
+                                </button>
+                            </div>
+                        </div>
 
-        <script type="text/javascript" src="js/MainController.js"></script>
-        <script type="text/javascript" src="js/dbService.js"></script>
-    </body>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+    <script type="text/javascript" src="https://code.angularjs.org/1.5.5/angular.min.js"></script>
+    <script type="text/javascript" src="https://code.angularjs.org/1.5.5/angular-animate.min.js"></script>
+    <script type="text/javascript" src="https://code.angularjs.org/1.5.5/angular-aria.min.js"></script>
+    <script type="text/javascript" src="https://code.angularjs.org/1.5.5/angular-messages.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.8/js/materialize.min.js"></script>
+    <script src="https://use.fontawesome.com/45c581f7a2.js"></script>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+
+    <script type="text/javascript" src="js/scripts.js"></script>
+    <script type="text/javascript" src="js/services/dataValidations.js"></script>
+    <script type="text/javascript" src="js/services/uiEvents.js"></script>
+    <script type="text/javascript" src="js/MainController.js"></script>
+    <script type="text/javascript" src="js/services/dbService.js"></script>
+
+    <script type="text/javascript">
+     // Load the Visualization API and the corechart package.
+      google.charts.load('current', {'packages':['corechart']});
+
+      // Set a callback to run when the Google Visualization API is loaded.
+      google.charts.setOnLoadCallback(drawChart);
+
+      // Callback that creates and populates a data table,
+      // instantiates the pie chart, passes in the data and
+      // draws it.
+      function drawChart() {
+
+        // Create the data table.
+        var data = new google.visualization.DataTable();
+        data.addColumn('string', 'Topping');
+        data.addColumn('number', 'Slices');
+        data.addRows([
+          ['Mushrooms', 3],
+          ['Onions', 1],
+          ['Olives', 1],
+          ['Zucchini', 1],
+          ['Pepperoni', 2]
+        ]);
+
+        // Set chart options
+        var options = {'title':'How Much Pizza I Ate Last Night',
+                       'width':400,
+                       'height':300};
+
+        // Instantiate and draw our chart, passing in some options.
+        var chart = new google.visualization.PieChart(document.getElementById('chart_div'));
+        chart.draw(data, options);
+      }
+    </script>
+
+</body>
+
 </html>

@@ -1,0 +1,43 @@
+html {
+  height: 100%;
+}
+body {
+  min-height: 100%;
+}
+
+#toast-container {
+  top: auto !important;
+  bottom: 10%;
+  left:7%;  
+}
+
+.errors{
+    background-color:#ef9a9a;
+    border-radius: 10px;
+    padding:5px;
+}
+
+.errors p{
+    margin-top:5px;
+    margin-bottom:5px;
+}
+
+#home{
+    width:100%;
+}
+
+#home .wrapper{
+    width:80%;
+    display: table;
+    margin: 50px auto 0 auto;;
+} 
+
+.delete-product{
+    cursor: pointer;
+    color: #c62828;
+}
+
+#edit_product_modal{
+    width: 53%;
+    top:12%;
+}
