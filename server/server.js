@@ -15,27 +15,10 @@ app.use('/admin', express.static('admin'));
 var sequelize = new Sequelize('webtech_proj_db', 'eduardsocea', '',{
     dialect:'mysql',
     host: '127.0.0.1',
-    port: 3306
-});
-
-
-
-var Category = sequelize.define('categories', {
-    name:{
-        type: Sequelize.STRING,
-        field: 'name'
-    }
-}, {
-  timestamps: false 
-});
-
-Category.sync({force: true})
-    .then(function () { return Category.create({name: "Alimentare"})})
-    .then(function () { return Category.create({name: "Imbracaminte"})})
-    .then(function () { return Category.create({name: "Electronice"})})
-    .then(function () { return Category.create({name: "Electrocasnice"})})
-    .then(function () { return Category.create({name: "Altele"})});
+    port: 3306,
     
+});
+
 
 var Product = sequelize.define('products', {
     name:{
@@ -58,14 +41,35 @@ var Product = sequelize.define('products', {
   timestamps: false 
 });
 
-Product.sync({force: true});    
+
+
+var Category = sequelize.define('categories', {
+    name:{
+        type: Sequelize.STRING,
+        field: 'name'
+    }
+}, {
+  timestamps: false 
+});
+
+
     
+    
+Product.belongsTo(Category);    
 Category.hasMany(Product, {
   foreignKey: {
     name: 'categoryId',
     allowNull: false
   }
 });
+
+// sequelize.sync({force: true})
+//     .then(function () { return Category.create({name: "Alimentare"})})
+//     .then(function () { return Category.create({name: "Imbracaminte"})})
+//     .then(function () { return Category.create({name: "Electronice"})})
+//     .then(function () { return Category.create({name: "Electrocasnice"})})
+//     .then(function () { return Category.create({name: "Altele"})});
+
 
 //Products
 app.post('/products', function(request, response){
@@ -82,11 +86,31 @@ app.get('/products', function(request, response){
     });
 });
 
+app.get('/products/:id', function(request, response){
+    Product.find({
+        where: {id: request.params.id},
+        include: [Category]
+    }).then(function(products){
+        response.status(200).send(products);
+    });
+});
+
+app.get('/productsWithCategory', function(request,response){
+    Product.findAll({
+        include: [Category]
+    }).then(function(products){
+        response.status(200).send(products);
+    });
+});
+
 app.put('/products/:id', function(request, response){
-   Product.findById(request.params.id)
-   .then(function(product){
+   Product.find({
+       where: {id :request.params.id}
+       })
+//   .on('success', function(product){
+  .then(function(product){
        if(product){
-           product.updateAttribute(request.body)
+           product.updateAttributes(request.body)
            .then(function(){
                response.status(200).send('updated');
            })
@@ -100,6 +124,7 @@ app.put('/products/:id', function(request, response){
        }
    })
 });
+
 
 
 app.delete('/products/:id', function(request, response){
@@ -118,12 +143,28 @@ app.delete('/products/:id', function(request, response){
        else{
            response.status(404).send();
        }
-   })
+   });
+});
+
+app.get('/productsByCategoryId/:id', function(request,response){
+    Product.findAll({
+        where: {categoryId : request.params.id},
+    }).then(function(products){
+        response.status(200).send(products);
+    });
 });
 
 //Categories
 app.get('/categories', function(request, response){
     Category.findAll().then(function(categories){
+        response.status(200).send(categories);
+    });
+});
+
+app.get('/categoryProducts', function(request,response){
+    Category.findAll({
+        include: [Product]
+    }).then(function(categories){
         response.status(200).send(categories);
     });
 });
