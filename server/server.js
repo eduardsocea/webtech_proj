@@ -42,7 +42,6 @@ var Product = sequelize.define('products', {
 });
 
 
-
 var Category = sequelize.define('categories', {
     name:{
         type: Sequelize.STRING,
@@ -53,6 +52,19 @@ var Category = sequelize.define('categories', {
 });
 
 
+var Setting = sequelize.define('settings', {
+    date:{
+        type: Sequelize.STRING,
+        field: 'date'
+    },
+    value:{
+        type: Sequelize.DECIMAL,
+        field: 'value'
+    }
+}, {
+  timestamps: false 
+});
+
     
     
 Product.belongsTo(Category);    
@@ -62,6 +74,8 @@ Category.hasMany(Product, {
     allowNull: false
   }
 });
+
+// Setting.sync({force:true});
 
 // sequelize.sync({force: true})
 //     .then(function () { return Category.create({name: "Alimentare"})})
@@ -167,4 +181,32 @@ app.get('/categoryProducts', function(request,response){
     }).then(function(categories){
         response.status(200).send(categories);
     });
+});
+
+//Settings
+app.get('/settings', function(request, response){
+    Setting.findAll().then(function(settings){
+        response.status(200).send(settings);
+    });
+});
+
+app.put('/settings/:id', function(request, response){
+   Setting.find({
+       where: {id :request.params.id}
+       })
+  .then(function(setting){
+       if(setting){
+           setting.updateAttributes(request.body)
+           .then(function(){
+               response.status(200).send('updated');
+           })
+           .catch(function(error){
+               console.warn(error);
+               response.status(500).send('server error');
+           });
+       }
+       else{
+           response.status(404).send();
+       }
+   })
 });
