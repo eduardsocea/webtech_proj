@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.8/css/materialize.min.css">
     <link rel="stylesheet" type="text/css" href="css/styles.css">
     <title>
@@ -46,7 +46,7 @@
                 <i class="material-icons">menu</i>
             </a>
             <ul>
-                <li><a class="btn-floating green" href="#settings_modal"><i class="material-icons">settings</i></a></li>
+                <li><a class="btn-floating green" href="#settings_modal" ng-click="getSettings()"><i class="material-icons">settings</i></a></li>
                 <li><a class="btn-floating blue" href="#insert_product_modal"><i class="fa fa-plus" aria-hidden="true"></i></a></li>
             </ul>
         </div>
@@ -55,10 +55,39 @@
         <div id="settings_modal" class="modal">
             <div class="modal-content">
                 <h4>Settings</h4>
-                <p>A bunch of text</p>
-            </div>
-            <div class="modal-footer">
-                <a href="#!" class=" modal-action modal-close waves-effect waves-green btn-flat">Agree</a>
+                <div class="row">
+                    <form class="col s12">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Luna</th>
+                                    <th>Limita</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat = "setting in settings">
+                                    <td>
+                                        {{setting.date}}
+                                    </td>
+                                    <td>
+                                         <div class="input-field">
+                                             <input id="{{'LimitFor-' + $index}}" type="text" ng-model="settings[$index].value" placeholder="">
+                                         </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        
+                        <div class="row">
+                            <div class="col s12">
+                                <button class="btn waves-effect waves-light" type="submit" name="action" ng-click="updateSettings()">Salveaza
+                                    <i class="material-icons right">send</i>
+                                </button>
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
             </div>
         </div>
 
@@ -91,8 +120,7 @@
                         <div class="row">
                             <div class="col s12">
                                 <label>Categorie</label>
-                                <select id="category_id" ng-options="category as category.name for category in categories track by category.id" ng-model="productCategory"
-                                    class="browser-default">
+                                <select id="category_id" ng-options="category as category.name for category in categories track by category.id" ng-model="productCategory" class="browser-default">
                                     <option value="">-- select --</option>
                                     </select>
                             </div>
@@ -109,6 +137,7 @@
                 </div>
             </div>
         </div>
+
 
         <div id="products_modal" class="modal">
             <div class="modal-content">
@@ -185,8 +214,7 @@
                         <div class="row">
                             <div class="col s12">
                                 <label>Categorie</label>
-                                <select id="category_id" ng-options="category as category.name for category in categories track by category.id" ng-model="productCategory"
-                                    class="browser-default">
+                                <select id="category_id" ng-options="category as category.name for category in categories track by category.id" ng-model="productCategory" class="browser-default">
                                     <option value="">-- select --</option>
                                     </select>
                             </div>
@@ -221,38 +249,42 @@
     <script type="text/javascript" src="js/services/dbService.js"></script>
 
     <script type="text/javascript">
-     // Load the Visualization API and the corechart package.
-      google.charts.load('current', {'packages':['corechart']});
+        // Load the Visualization API and the corechart package.
+        google.charts.load('current', {
+            'packages': ['corechart']
+        });
 
-      // Set a callback to run when the Google Visualization API is loaded.
-      google.charts.setOnLoadCallback(drawChart);
+        // Set a callback to run when the Google Visualization API is loaded.
+        google.charts.setOnLoadCallback(drawChart);
 
-      // Callback that creates and populates a data table,
-      // instantiates the pie chart, passes in the data and
-      // draws it.
-      function drawChart() {
+        // Callback that creates and populates a data table,
+        // instantiates the pie chart, passes in the data and
+        // draws it.
+        function drawChart() {
 
-        // Create the data table.
-        var data = new google.visualization.DataTable();
-        data.addColumn('string', 'Topping');
-        data.addColumn('number', 'Slices');
-        data.addRows([
-          ['Mushrooms', 3],
-          ['Onions', 1],
-          ['Olives', 1],
-          ['Zucchini', 1],
-          ['Pepperoni', 2]
-        ]);
+            // Create the data table.
+            var data = new google.visualization.DataTable();
+            data.addColumn('string', 'Topping');
+            data.addColumn('number', 'Slices');
+            data.addRows([
+                ['Mushrooms', 3],
+                ['Onions', 1],
+                ['Olives', 1],
+                ['Zucchini', 1],
+                ['Pepperoni', 2]
+            ]);
 
-        // Set chart options
-        var options = {'title':'How Much Pizza I Ate Last Night',
-                       'width':400,
-                       'height':300};
+            // Set chart options
+            var options = {
+                'title': 'How Much Pizza I Ate Last Night',
+                'width': 400,
+                'height': 300
+            };
 
-        // Instantiate and draw our chart, passing in some options.
-        var chart = new google.visualization.PieChart(document.getElementById('chart_div'));
-        chart.draw(data, options);
-      }
+            // Instantiate and draw our chart, passing in some options.
+            var chart = new google.visualization.PieChart(document.getElementById('chart_div'));
+            chart.draw(data, options);
+        }
     </script>
 
 </body>

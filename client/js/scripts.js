@@ -18,7 +18,6 @@ $(document).ready(function () {
 
   $('.tooltipped').tooltip({ delay: 0 });
 
-
 });
 
 function getIndexOfObjectArray(array, key, value) {

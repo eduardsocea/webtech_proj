@@ -1,37 +1,40 @@
-(function () {
+/*global productCreated, productUpdated, settingsUpdated*/
+
+
+(function() {
     'use strict'
     angular.module('webtechApp', [])
         .controller('MainController', MainController);
 
-    function MainController($scope, $filter, dbService) {
+    function MainController($scope, $filter, dbService, $http) {
 
-        var onCategoryLoaded = function (data) {
+        var onCategoryLoaded = function(data) {
             $scope.categories = data;
         }
 
-        var onError = function (response) {
+        var onError = function(response) {
             console.log(response);
         }
 
-        var onProductCreated = function (data) {
+        var onProductCreated = function(data) {
             onCategoryLoaded;
             dbService.getCategoryProducts().then(onCategoryproductsLoaded, onError);
             productCreated();
         }
 
-        var onProductsCategoryLoad = function (data) {
+        var onProductsCategoryLoad = function(data) {
             $scope.productsCategory = data;
         }
 
-        var onCategoryproductsLoaded = function (data) {
+        var onCategoryproductsLoaded = function(data) {
             $scope.categoryProducts = data;
         }
 
-        var onProductsByCategoryLoaded = function (data) {
+        var onProductsByCategoryLoaded = function(data) {
             $scope.productsByCategory = data;
         }
 
-        var onUpdatedLoaded = function (data) {
+        var onUpdatedLoaded = function(data) {
             $scope.productId = data.id;
             $scope.productName = data.name;
             $scope.productDatestamp = $filter('date')(data.datestamp, "MM/dd/yyyy");
@@ -40,25 +43,37 @@
         }
 
 
-        var onProductUpdated = function (data) {
+        var onProductUpdated = function(data) {
             dbService.getCategoryProducts().then(onCategoryproductsLoaded, onError);
             $scope.getProductsByCategory($scope.productCategory.id);
             productUpdated();
         }
+
+        var onSettingsLoaded = function(data) {
+            console.log(data);
+            $scope.settings = data;
+        }
+
+        var onSettingsUpdated = function() {
+            console.log('updated event')
+            settingsUpdated();
+        }
+
         dbService.getCategories().then(onCategoryLoaded, onError);
         dbService.getCategoryProducts().then(onCategoryproductsLoaded, onError);
-        $scope.addProduct = function () {
+        $scope.addProduct = function() {
             var errors = validateProduct("#insert_product_modal");
             if (errors.length != 0) {
                 $scope.errors = errors;
-            } else {
+            }
+            else {
                 $scope.errors = null;
                 dbService.createProduct($scope.productName, $scope.productPrice, $scope.productDatestamp, $scope.productCategory.id).then(onProductCreated, onError);
             }
 
         };
 
-        $scope.getTotalPriceOfCategory = function (category) {
+        $scope.getTotalPriceOfCategory = function(category) {
             var sum = 0;
             for (var i = 0; i < $scope.categoryProducts.length; ++i) {
                 var aux = $scope.categoryProducts[i];
@@ -71,10 +86,10 @@
             return sum;
         }
 
-        $scope.getProductsByCategory = function (categoryId) {
-            dbService.getProductsByCategory(categoryId).then(function (data) {
+        $scope.getProductsByCategory = function(categoryId) {
+            dbService.getProductsByCategory(categoryId).then(function(data) {
                 $scope.productsByCategory = groupProductsByDate(data);
-                $scope.getSubTotal = function (datestamp) {
+                $scope.getSubTotal = function(datestamp) {
                     var sum = 0;
                     for (var i = 0; i < $scope.productsByCategory.length; ++i) {
                         var aux = $scope.productsByCategory[i];
@@ -89,23 +104,41 @@
             }, onError);
         }
 
-        $scope.deleteProduct = function (productId, $event) {
+        $scope.deleteProduct = function(productId, $event) {
             dbService.deleteProduct(productId).then(productDeleted($event.target), onError);
         }
 
-        $scope.loadUpdateProduct = function (productId) {
+        $scope.loadUpdateProduct = function(productId) {
             dbService.getProductById(productId).then(onUpdatedLoaded, onError);
         }
 
-        $scope.updateProduct = function (productId) {
+        $scope.updateProduct = function(productId) {
             var errors = validateProduct("#edit_product_modal");
             if (errors.length != 0) {
                 $scope.errors = errors;
-            } else {
+            }
+            else {
                 $scope.errors = null;
                 dbService.updateProduct(productId, $scope.productName, $scope.productPrice, $scope.productDatestamp, $scope.productCategory.id).then(onProductUpdated, onError);
             }
         }
+
+        $scope.getSettings = function() {
+            dbService.getSettings().then(onSettingsLoaded, onError);
+        }
+
+        $scope.updateSettings = function() {
+            var response = dbService.updateSettings($scope.settings);
+            console.log('response = ' + response);
+            if (response == 'updated') {
+                // onSettingsUpdated();
+                settingsUpdated();
+            }
+            else {
+                console.log(response);
+            }
+        }
+
 
     }
 
