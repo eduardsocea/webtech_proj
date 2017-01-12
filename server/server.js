@@ -65,6 +65,22 @@ var Setting = sequelize.define('settings', {
   timestamps: false 
 });
 
+var Alert = sequelize.define('alerts', {
+    percentage:{
+        type: Sequelize.INTEGER,
+        field: 'percentage'
+    },
+    isTriggered:{
+        type: Sequelize.BOOLEAN,
+        field: 'isTriggered'
+    },
+    settingId:{
+        type: Sequelize.INTEGER,
+        field: 'settingId'
+    }
+}, {
+  timestamps: false 
+});
     
     
 Product.belongsTo(Category);    
@@ -75,7 +91,17 @@ Category.hasMany(Product, {
   }
 });
 
+Alert.belongsTo(Setting);
+Setting.hasMany(Alert,{
+    foreignKey:{
+        name: 'settingId',
+        allowNull: false
+    }
+});
+
 // Setting.sync({force:true});
+// Alert.sync({force:true});
+
 
 // sequelize.sync({force: true})
 //     .then(function () { return Category.create({name: "Alimentare"})})
@@ -121,12 +147,11 @@ app.put('/products/:id', function(request, response){
    Product.find({
        where: {id :request.params.id}
        })
-//   .on('success', function(product){
   .then(function(product){
        if(product){
            product.updateAttributes(request.body)
            .then(function(){
-               response.status(200).send('updated');
+               response.status(200).send(product);
            })
            .catch(function(error){
                console.warn(error);
@@ -209,4 +234,43 @@ app.put('/settings/:id', function(request, response){
            response.status(404).send();
        }
    })
+});
+
+//Alerts
+app.get('/alerts', function(request, response){
+    Alert.findAll({
+        include: [Setting]
+    }).then(function(alerts){
+        response.status(200).send(alerts);
+    });
+});
+
+app.put('/alerts/:id', function(request, response){
+   Alert.find({
+       where: {id :request.params.id}
+       })
+  .then(function(notificaton){
+       if(notificaton){
+           notificaton.updateAttributes(request.body)
+           .then(function(){
+               response.status(200).send('updated');
+           })
+           .catch(function(error){
+               console.warn(error);
+               response.status(500).send('server error');
+           });
+       }
+       else{
+           response.status(404).send();
+       }
+   });
+});
+
+app.get('/triggeredAlerts', function(request, response){
+    Alert.findAll({
+        where: {isTriggered: true},
+        include: [Setting]
+    }).then(function(alerts){
+        response.status(200).send(alerts);
+    });
 });
